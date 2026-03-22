@@ -9,14 +9,30 @@ import sys
 def parse_arguments():
     """
     Parse command-line arguments.
+
     Expected inputs:
-    - duration: total number of time steps
-    - sws: sender window size
-    -rws: receiver window size
+    - Duration: Total number of time steps
+    - SWS: Sender Window Size
+    - RWS: Receiver Window Size
     - error_rate: timeout duration for retranmission
+    
     Return all values in appropriate types.
     """
-    pass
+    if len(sys.argv) != 6:
+        print("Usage: python main.py <duration> <sws> <rws> <error_rate> <timeout>")
+        sys.exit(1)
+
+    try:
+        duration = int(sys.argv[1])
+        sws = int(sys.argv[2])
+        rws = int(sys.argv[3])
+        error_rate = float(sys.argv[4])
+        timeout = int(sys.argv[5])
+    except ValueError:
+        print("Invalid argument types. Please ensure duration, sws, rws, and timeout are integers, and error_rate is a float.")
+        sys.exit(1)
+
+    return duration, sws, rws, error_rate, timeout
 
 def initialize_sender(sws):
     """
