@@ -37,13 +37,32 @@ def parse_arguments():
 def initialize_sender(sws):
     """
     Initialize sender's state.
+
     Should include:
-    - current window (frames in flight)
-    - last frame sent (LFS)
-    - timers for each frame (for timeout tracking)
+    - Current window (frames in flight)
+    - Last Frame Sent (LFS)
+    - Timers for each frame (for timeout tracking)
+
     Return a sender state object (dict or custom structure).
     """
-    pass
+    sender = {}
+
+    # List to store frames currently in the sender window (frames in flight)
+    sender["window"] = []
+
+    # Last Frame Sent (LFS)
+    # Starts at -1 because no frames have been sent yet
+    sender["LFS"] = -1
+
+    # Dictionary to track timers for each frame in the sender window
+    # Key: frame ID
+    # Value: time step when the frame was sent (for timeout tracking)
+    sender["timers"] = {}
+
+    # Store sender window size (useful later for checking limits)
+    sender["sws"] = sws
+
+    return sender
 
 def initialize_receiver(rws):
     """"
