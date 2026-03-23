@@ -67,13 +67,32 @@ def initialize_sender(sws):
 def initialize_receiver(rws):
     """"
     Initialize receiver's state.
+
     Should include:
     - receiver window range
     - last frame received in order
     - buffer for out-of-order frames
+
     Return a receiver state object .
     """
-    pass
+    receiver = {}
+
+    # Receiver Window Size
+    receiver["rws"] = rws
+
+    # Last Frame Received in order (LFR)
+    # Starts at -1 because no frames have been received yet
+    receiver["last_frame_received"] = -1
+
+    # Largest Acceptable Frame (LAF)
+    # Defines the upper bound of the receiver window
+    receiver["largest_acceptable_frame"] = receiver["last_frame_received"] + rws
+
+    # Buffer to store out-of-order frames
+    # Using a list
+    receiver["buffer"] = []
+
+    return receiver
 
 def generate_frame_sequence(sws):
     """
