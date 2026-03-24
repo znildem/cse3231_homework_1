@@ -355,7 +355,7 @@ def main():
     sequence = generate_frame_sequence(sws)
 
     print_header(duration, sws, rws, error_rate, timeout, sequence)
-        print("t\t|\tSent\t|\tACK\t|\tLFS\t|\tLFR\t|\tLAF\t|\tBuffer")
+    print("t\t|\tSent\t|\tACK\t|\tLFS\t|\tLFR\t|\tLAF\t|\tBuffer")
 
     for t in range(duration):
         # 1. Check for timeouts and mark frames for retransmission
