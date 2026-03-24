@@ -189,7 +189,7 @@ def receiver_process_frames(receiver, frames):
     - Accept frames within receiver window
     - Discard frame outside window
     - Buffer out-of-order frames
-    - Update lat frame received in order
+    - Update last frame received in order
     - Generate ACKs
     
     Return:
@@ -226,11 +226,17 @@ def receiver_process_frames(receiver, frames):
                 if frame not in receiver["buffer"]:
                     receiver["buffer"].append(frame)
 
-        # Update largest acceptable frame (LAF)
-        receiver["largest_acceptable_frame"] = receiver["last_frame_received"] + receiver["rws"]
+                    # Keep buffer sorted for easier processing
+                    receiver["buffer"].sort()
+        else:
+            # Frame is outside the receiver window, so discard it
+            pass
 
-        # Update ACK (cumulative ACK = last in-order frame)
-        ack = receiver["last_frame_received"]
+    # Update largest acceptable frame (LAF)
+    receiver["largest_acceptable_frame"] = receiver["last_frame_received"] + receiver["rws"]
+
+    # Update ACK (cumulative ACK = last in-order frame)
+    ack = receiver["last_frame_received"]
 
     return receiver, ack
 
