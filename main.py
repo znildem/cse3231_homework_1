@@ -116,15 +116,41 @@ def generate_frame_sequence(sws):
 def sender_send_frames(sender, sws, current_time):
     """
     Decide which frames the sender transmits at this time step.
+    
     Should:
-    - check available space in sender window
-    - send new frames if possible
-    - update LFS (Last Frame Sent)
-    - start timers for new frames
+    - Check available space in sender window
+    - Send new frames if possible
+    - Update LFS (Last Frame Sent)
+    - Start timers for new frames
+    
     Return:
-    - list of frames sent in this time step
+    - List of frames sent in this time step
     """
-    pass
+    sent_frames = []
+
+    # Check if there is space in the sender window
+    # If the number of frames currently in flight is less than the sender window size,
+    # the sender is allowed to transmit a new frame
+    if len(sender["window"]) < sws:
+        # Compute the next frame number to send
+        # Since LFS stores the last frame sent, the next frame is LFS + 1
+        next_frame = sender["LFS"] + 1
+
+        # Add the new frame to the sender window
+        sender["window"].append(next_frame)
+
+        # Update Last Frame Sent (LFS) value
+        sender["LFS"] = next_frame
+
+        # Start timer for this frame
+        # Store the current time step as the send time
+        sender["timers"][next_frame] = current_time
+
+        # Record the transmitted frame in the output list
+        sent_frames.append(next_frame)
+
+        # Return the list of frames sent during this time step
+    return sent_frames
 
 def simulate_channel(frames, error_rate):
     """
