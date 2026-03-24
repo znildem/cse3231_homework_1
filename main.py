@@ -1,7 +1,7 @@
 # CSE 3231 - Homework 1
 # Sliding Window Algorithm Simulation
 # Group Name: BAYRAK_ILDEM
-# Student 1: Elif Dila Bayrak, ID
+# Student 1: Elif Dila Bayrak, 904086652
 # Student 2: Zeynep Neva Ildem, 904034285
 
 import sys
@@ -295,13 +295,31 @@ def check_timeouts(sender, timeout, current_time):
 def print_header(duration, sws, rws, error_rate, timeout, sequence):
     """
     Print simulation header.
+    
     Should include:
-    - student names/IDs
-    - group name
-    - parameters
-    - sequence number space
+    - Student names/IDs
+    - Group name
+    - Parameters
+    - Sequence number space
     """
-    pass
+    print("CSE 3231 - Homework 1")
+    print("Sliding Window Algorithm Simulation")
+
+    print("Group Name: BAYRAK_ILDEM")
+    print("Student 1: Elif Dila Bayrak, 904086652")
+    print("Student 2: Zeynep Neva Ildem, 904034285")
+
+    print("\nSimulation Parameters:")
+    print(f"Duration: {duration} time steps")
+    print(f"Sender Window Size (SWS): {sws}")
+    print(f"Receiver Window Size (RWS): {rws}")
+    print(f"Error Rate: {error_rate}")
+    print(f"Timeout Duration: {timeout} time steps")
+
+    print(f"Sequence Number Space: ")
+    print(sequence)
+
+    print("\nSimulation Start...\n")
 
 def print_timestep(t, sent_frame, ack_received, lfs, last_frame_received, largest_acceptable_frame, receiver_buffer):
     """
