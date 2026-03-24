@@ -6,6 +6,7 @@
 
 import sys
 import random
+random.seed(1)
 
 def parse_arguments():
     """
@@ -132,6 +133,10 @@ def sender_send_frames(sender, sws, current_time):
     # Only send one new frame per time step if the sender window has room
     if len(sender["window"]) < sws:
         next_frame = sender["LFS"] + 1
+
+        # Prevents sending a frame already in flight
+        if next_frame in sender["window"]:
+            return []
 
         sender["window"].append(next_frame)
         sender["LFS"] = next_frame
