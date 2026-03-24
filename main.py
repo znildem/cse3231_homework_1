@@ -181,7 +181,7 @@ def simulate_channel(frames, error_rate):
 
     return received_frames
 
-def receiver_process_frames(reciever, frames):
+def receiver_process_frames(receiver, frames):
     """
     Process incoming frames at the receiver.
     
