@@ -129,25 +129,14 @@ def sender_send_frames(sender, sws, current_time):
     """
     sent_frames = []
 
-    # Check if there is space in the sender window
-    # If the number of frames currently in flight is less than the sender window size,
-    # the sender is allowed to transmit a new frame
-    if len(sender["window"]) < sws:
-        # Compute the next frame number to send
-        # Since LFS stores the last frame sent, the next frame is LFS + 1
+    # Keep sending new frames until the sender window is full
+    while len(sender["window"]) < sws:
         next_frame = sender["LFS"] + 1
 
-        # Add the new frame to the sender window
         sender["window"].append(next_frame)
-
-        # Update Last Frame Sent (LFS) value
         sender["LFS"] = next_frame
-
         # Start timer for this frame
-        # Store the current time step as the send time
         sender["timers"][next_frame] = current_time
-
-        # Record the transmitted frame in the output list
         sent_frames.append(next_frame)
 
         # Return the list of frames sent during this time step
@@ -291,10 +280,10 @@ def check_timeouts(sender, timeout, current_time):
             # Mark the frame for retransmission
             retransmit_frames.append(frame)
 
-        # Reset timers for retransmitted frames
-        # Since they are being "resent" at current_time
-        for frame in retransmit_frames:
-            sender["timers"][frame] = current_time
+    # Reset timers for retransmitted frames
+    # Since they are being "resent" at current_time
+    for frame in retransmit_frames:
+        sender["timers"][frame] = current_time
 
     return retransmit_frames
 
@@ -366,29 +355,37 @@ def main():
     sequence = generate_frame_sequence(sws)
 
     print_header(duration, sws, rws, error_rate, timeout, sequence)
+        print("t\t|\tSent\t|\tACK\t|\tLFS\t|\tLFR\t|\tLAF\t|\tBuffer")
 
     for t in range(duration):
-        # 1. Sender sends frames
-        sent_frames = sender_send_frames(sender, sws, t)
-
-        # 2. Channel simulates transmission
-        received_frames = simulate_channel(sent_frames, error_rate)
-
-        # 3. Receiver processes incoming frames and generates ACK
-        receiver, ack = receiver_process_frames(receiver, received_frames)
-
-        # 4. Channel simulation (ACK back to sender)
-        ack_received = simulate_channel([ack], error_rate)
-
-        # 5. Sender processes ACK
-        if ack_received:
-            sender_receive_ack(sender, ack_received[0], t)
-
-        # 6. Check for timeouts and mark frames for retransmission
+        # 1. Check for timeouts and mark frames for retransmission
         retransmissions = check_timeouts(sender, timeout, t)
 
-        # 7. Print current time step status
-        print_timestep(t, sent_frames, ack_received, sender.get("LFS", None), receiver.get("last_frame_received", None), receiver.get("largest_acceptable_frame", None), receiver.get("buffer", []))
+        # 2. Send new frames if there is still room in the sender window
+        new_frames = sender_send_frames(sender, sws, t)
+
+        # 3. Frames actually sent this time step = retransmissions + new frames
+        sent_frames = retransmissions + new_frames
+
+        # 4. Channel simulates transmission
+        received_frames = simulate_channel(sent_frames, error_rate)
+
+        # 5. Receiver processes incoming frames and generates ACK
+        receiver, ack = receiver_process_frames(receiver, received_frames)
+
+        # 6. Channel simulation (ACK back to sender)
+        ack_result = simulate_channel([ack], error_rate)
+
+        if ack_result:
+            ack_received = ack_result[0]
+        else:
+            ack_received = None
+
+        # 7. Sender processes ACK if not corrupted
+        sender_receive_ack(sender, ack_received, t)
+
+        # 8. Print current time step status
+        print_timestep(t, sent_frames, ack_received, sender["LFS"], receiver["last_frame_received"], receiver["largest_acceptable_frame"], receiver["buffer"])
 
 if __name__ == "__main__":
     main()
