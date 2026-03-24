@@ -5,6 +5,7 @@
 # Student 2: Zeynep Neva Ildem, 904034285
 
 import sys
+import random
 
 def parse_arguments():
     """
@@ -155,13 +156,30 @@ def sender_send_frames(sender, sws, current_time):
 def simulate_channel(frames, error_rate):
     """
     Simulate transmission over the channel.
+    
     Should:
-    - randomly decide if each frame is corrputed based on error_rate
-    - mark corrputed frames (e.g., with '?'
+    - Randomly decide if each frame is corrputed based on error_rate
+    - Mark corrputed frames (e.g., with '?'
+    
     Return:
-    - list of recieved frames (with corruption if applicable)
+    - List of recieved frames (with corruption if applicable)
     """
-    pass
+    received_frames = []
+
+    # Loop through each frame being transmitted
+    for frame in frames:
+        # Generate a random number between 0 and 1
+        random_value = random.random()
+
+        # If the random value is less than error_rate, mark as corrupted
+        if random_value < error_rate:
+            # Mark the frame as corrupted (using '?')
+            received_frames.append('?')
+        else:
+            # Otherwise, the frame is received correctly
+            received_frames.append(frame)
+
+    return received_frames
 
 def receiver_process_frames(reciever, frames):
     """
