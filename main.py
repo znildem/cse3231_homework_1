@@ -335,7 +335,7 @@ def print_timestep(t, sent_frame, ack_received, lfs, last_frame_received, larges
     # Format ACK
     if isinstance(ack_received, list):
         ack_str = ", ".join(str(ack) for ack in ack_received)
-    elif ack_received is not None:
+    elif ack_received is None:
         ack_str = "-"
     else:
         ack_str = str(ack_received)
@@ -355,7 +355,8 @@ def main():
     sequence = generate_frame_sequence(sws)
 
     print_header(duration, sws, rws, error_rate, timeout, sequence)
-    print("t\t|\tSent\t|\tACK\t|\tLFS\t|\tLFR\t|\tLAF\t|\tBuffer")
+    print(f"{'t':<5} | {'Sent':<10} | {'ACK':<10} | {'LFS':<5} | {'LFR':<10} | {'LAF':<10} | {'Buffer'}")
+    print("-" * 80)
 
     for t in range(duration):
         # 1. Check for timeouts and mark frames for retransmission
