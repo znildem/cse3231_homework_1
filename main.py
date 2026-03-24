@@ -212,7 +212,7 @@ def receiver_process_frames(receiver, frames):
         if lower_bound <= frame <= upper_bound:
             # If frame is the next expected frame (in order)
             if frame == lower_bound:
-                receiver[last_frame_received] = frame
+                receiver["last_frame_received"] = frame
 
                 # Check buffer for the next in-order frames
                 # Keep advancing LFR if buffered frames are available
