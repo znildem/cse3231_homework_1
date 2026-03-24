@@ -116,30 +116,28 @@ def generate_frame_sequence(sws):
 
 def sender_send_frames(sender, sws, current_time):
     """
-    Decide which frames the sender transmits at this time step.
-    
+    Decide which new frame the sender transmits at this time step.
+
     Should:
     - Check available space in sender window
-    - Send new frames if possible
+    - Send one new frame if possible
     - Update LFS (Last Frame Sent)
-    - Start timers for new frames
-    
+    - Start timer for the new frame
+
     Return:
     - List of frames sent in this time step
     """
     sent_frames = []
 
-    # Keep sending new frames until the sender window is full
-    while len(sender["window"]) < sws:
+    # Only send one new frame per time step if the sender window has room
+    if len(sender["window"]) < sws:
         next_frame = sender["LFS"] + 1
 
         sender["window"].append(next_frame)
         sender["LFS"] = next_frame
-        # Start timer for this frame
         sender["timers"][next_frame] = current_time
         sent_frames.append(next_frame)
 
-        # Return the list of frames sent during this time step
     return sent_frames
 
 def simulate_channel(frames, error_rate):
@@ -212,10 +210,9 @@ def receiver_process_frames(receiver, frames):
 
             else:
                 # Out-of-order frame, store in buffer if not already there
-                if frame not in receiver["buffer"]:
+                # and not already received in order
+                if frame not in receiver["buffer"] and frame > receiver["last_frame_received"]:
                     receiver["buffer"].append(frame)
-
-                    # Keep buffer sorted for easier processing
                     receiver["buffer"].sort()
         else:
             # Frame is outside the receiver window, so discard it
@@ -344,7 +341,7 @@ def print_timestep(t, sent_frame, ack_received, lfs, last_frame_received, larges
     buffer_str = ", ".join(str(frame) for frame in receiver_buffer) if receiver_buffer else "Empty"
 
     # Print row
-    print(f"{t:<5} | {sent_str:<15} | {ack_str:<10} | {lfs:<5} | {last_frame_received:<10} | {largest_acceptable_frame:<10} | {buffer_str}")
+    print(f"{t:<5} | {sent_str:<18} | {ack_str:<10} | {lfs:<5} | {last_frame_received:<10} | {largest_acceptable_frame:<10} | {buffer_str}")
 
 def main():
     duration, sws, rws, error_rate, timeout = parse_arguments()
@@ -355,26 +352,27 @@ def main():
     sequence = generate_frame_sequence(sws)
 
     print_header(duration, sws, rws, error_rate, timeout, sequence)
-    print(f"{'t':<5} | {'Sent':<15} | {'ACK':<10} | {'LFS':<5} | {'LFR':<10} | {'LAF':<10} | {'Buffer'}")
-    print("-" * 85)
+    print(f"{'t':<5} | {'Sent':<18} | {'ACK':<10} | {'LFS':<5} | {'LFR':<10} | {'LAF':<10} | {'Buffer'}")
+    print("-" * 90)
 
     for t in range(duration):
-        # 1. Check for timeouts and mark frames for retransmission
+        # 1. Check for timed-out frames
         retransmissions = check_timeouts(sender, timeout, t)
 
-        # 2. Send new frames if there is still room in the sender window
-        new_frames = sender_send_frames(sender, sws, t)
+        # 2. If there are timed-out frames, retransmit only those this step
+        if retransmissions:
+            sent_frames = retransmissions
+        else:
+            # Otherwise send one new frame if the sender window has room
+            sent_frames = sender_send_frames(sender, sws, t)
 
-        # 3. Frames actually sent this time step = retransmissions + new frames
-        sent_frames = retransmissions + new_frames
-
-        # 4. Channel simulates transmission
+        # 3. Simulate channel transmission of sent frames
         received_frames = simulate_channel(sent_frames, error_rate)
 
-        # 5. Receiver processes incoming frames and generates ACK
+        # 4. Receiver processes incoming frames and generates ACK
         receiver, ack = receiver_process_frames(receiver, received_frames)
 
-        # 6. Channel simulation (ACK back to sender)
+        # 5. Simulate ACK traveling back to sender
         ack_result = simulate_channel([ack], error_rate)
 
         if ack_result:
@@ -382,11 +380,19 @@ def main():
         else:
             ack_received = None
 
-        # 7. Sender processes ACK if not corrupted
+        # 6. Sender processes ACK if not corrupted
         sender_receive_ack(sender, ack_received, t)
 
-        # 8. Print current time step status
-        print_timestep(t, sent_frames, ack_received, sender["LFS"], receiver["last_frame_received"], receiver["largest_acceptable_frame"], receiver["buffer"])
+        # 7. Print current time step status
+        print_timestep(
+            t,
+            sent_frames,
+            ack_received,
+            sender["LFS"],
+            receiver["last_frame_received"],
+            receiver["largest_acceptable_frame"],
+            receiver["buffer"]
+        )
 
 if __name__ == "__main__":
     main()
