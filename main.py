@@ -344,7 +344,7 @@ def print_timestep(t, sent_frame, ack_received, lfs, last_frame_received, larges
     buffer_str = ", ".join(str(frame) for frame in receiver_buffer) if receiver_buffer else "Empty"
 
     # Print row
-    print(f"{t:<5} | {sent_str:<13} | {ack_str:<10} | {lfs:<5} | {last_frame_received:<10} | {largest_acceptable_frame:<10} | {buffer_str}")
+    print(f"{t:<5} | {sent_str:<15} | {ack_str:<10} | {lfs:<5} | {last_frame_received:<10} | {largest_acceptable_frame:<10} | {buffer_str}")
 
 def main():
     duration, sws, rws, error_rate, timeout = parse_arguments()
@@ -355,8 +355,8 @@ def main():
     sequence = generate_frame_sequence(sws)
 
     print_header(duration, sws, rws, error_rate, timeout, sequence)
-    print(f"{'t':<5} | {'Sent':<13} | {'ACK':<10} | {'LFS':<5} | {'LFR':<10} | {'LAF':<10} | {'Buffer'}")
-    print("-" * 83)
+    print(f"{'t':<5} | {'Sent':<15} | {'ACK':<10} | {'LFS':<5} | {'LFR':<10} | {'LAF':<10} | {'Buffer'}")
+    print("-" * 85)
 
     for t in range(duration):
         # 1. Check for timeouts and mark frames for retransmission
