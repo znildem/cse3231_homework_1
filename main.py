@@ -238,12 +238,31 @@ def receiver_process_frames(reciever, frames):
 def sender_receive_ack(sender, ack, current_time):
     """
     Process ACK at sender.
+    
     Should:
-    - remove acknowledged frames from window
-    - update sender state
-    - reset timers as needed
+    - Remove acknowledged frames from window
+    - Update sender state
+    - Reset timers as needed
     """
-    pass
+    # If ACK is corrupted or missing, ignore it
+    if ack == '?' or ack is None:
+        return
+    
+    # Remove all frames from the sender window that are:
+    # less than or equal to the ACK value
+    acknowledged_frames = []
+
+    for frame in sender["window"]:
+        if frame <= ack:
+            acknowledged_frames.append(frame)
+
+    # Remove acknowledged frames from the sender window
+    for frame in acknowledged_frames:
+        sender["window"].remove(frame)
+
+        # Remove timers for acknowledged frames
+        if frame in sender["timers"]:
+            del sender["timers"][frame]
 
 def check_timeouts(sender, timeout, current_time):
     """
