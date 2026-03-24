@@ -97,12 +97,21 @@ def initialize_receiver(rws):
 def generate_frame_sequence(sws):
     """
     Generate sequence number space based on window size.
+    
     Typically:
-    - sequence numbers wrap around
-    - size is usually related to window size (e.g., sws + 1 or power of 2)
+    - Sequence numbers wrap around
+    - Size is usually related to window size (e.g., sws + 1 or power of 2)
+    
     Return a list or range of valid frame IDs.
     """
-    pass
+    # Sequence number space size
+    # Using sws + 1 to avoid ambiguity between full and empty window
+    seq_size = sws + 1
+
+    # Generate sequence numbers from 0 to seq_size - 1
+    sequence = list(range(seq_size))
+
+    return sequence
 
 def sender_send_frames(sender, sws, current_time):
     """
