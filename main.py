@@ -324,16 +324,32 @@ def print_header(duration, sws, rws, error_rate, timeout, sequence):
 def print_timestep(t, sent_frame, ack_received, lfs, last_frame_received, largest_acceptable_frame, receiver_buffer):
     """
     Print one row of the simulation table.
+    
     Columns should match assignment format:
-    - time step
-    - frame sent
+    - Time step
+    - Frame sent
     - ACK reseived
     - LFS
-    - last frame recived
-    - largest acceptable frame
-    - receiver buffer contents
+    - Last frame recived
+    - Largest acceptable frame
+    - Receiver buffer contents
     """
-    pass
+    # Format sent frames to strings from a list
+    sent_str = ", ".join(str(frame) for frame in sent_frame) if sent_frame else "None"
+
+    # Format ACK
+    if isinstance(ack_received, list):
+        ack_str = ", ".join(str(ack) for ack in ack_received)
+    elif ack_received is not None:
+        ack_str = "-"
+    else:
+        ack_str = str(ack_received)
+
+    # Format receiver buffer contents
+    buffer_str = ", ".join(str(frame) for frame in receiver_buffer) if receiver_buffer else "Empty"
+
+    # Print row
+    print(f"{t:<5} | {sent_str:<10} | {ack_str:<10} | {lfs:<5} | {last_frame_received:<10} | {largest_acceptable_frame:<10} | {buffer_str}")
 
 def main():
     duration, sws, rws, error_rate, timeout = parse_arguments()
