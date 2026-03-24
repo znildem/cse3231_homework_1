@@ -267,13 +267,30 @@ def sender_receive_ack(sender, ack, current_time):
 def check_timeouts(sender, timeout, current_time):
     """
     Check for frames that timed out.
+    
     Should:
-    - identify frames whose timers exceeded timeout
-    - mark them for retransmission
+    - Identify frames whose timers exceeded timeout
+    - Mark them for retransmission
+    
     Return:
-    - list of frames to retransmit
+    - List of frames to retransmit
     """
-    pass
+    retransmit_frames = []
+
+    # Loop through all active timers
+    for frame, send_time in sender["timers"].items():
+
+        # Check if the frame has exceeded the timeout
+        if current_time - send_time >= timeout:
+            # Mark the frame for retransmission
+            retransmit_frames.append(frame)
+
+        # Reset timers for retransmitted frames
+        # Since they are being "resent" at current_time
+        for frame in retransmit_frames:
+            sender["timers"][frame] = current_time
+
+    return retransmit_frames
 
 def print_header(duration, sws, rws, error_rate, timeout, sequence):
     """
