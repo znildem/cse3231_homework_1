@@ -184,17 +184,56 @@ def simulate_channel(frames, error_rate):
 def receiver_process_frames(reciever, frames):
     """
     Process incoming frames at the receiver.
+    
     Should:
-    - accept frames within receiver window
-    - discard frame outside window
-    - buffer out-of-order frames
-    - update lat frame received in order
-    - generate ACKs
+    - Accept frames within receiver window
+    - Discard frame outside window
+    - Buffer out-of-order frames
+    - Update lat frame received in order
+    - Generate ACKs
+    
     Return:
-    - updates receiver state
+    - Updates receiver state
     - ACK(s) to send back
     """
-    pass
+    # Default ACK = last frame received in order (cumulative ACK)
+    ack = receiver["last_frame_received"]
+
+    for frame in frames:
+        # If frame is corrupted, ignore it (no update)
+        if frame == '?':
+            continue
+
+        # Compute current receiver window bounds
+        lower_bound = receiver["last_frame_received"] + 1
+        upper_bound = receiver["largest_acceptable_frame"]
+
+        # Check if frame is within the receiver window
+        if lower_bound <= frame <= upper_bound:
+            # If frame is the next expected frame (in order)
+            if frame == lower_bound:
+                receiver[last_frame_received] = frame
+
+                # Check buffer for the next in-order frames
+                # Keep advancing LFR if buffered frames are available
+                while (receiver["last_frame_received"] + 1) in receiver["buffer"]:
+                    next_in_order = receiver["last_frame_received"] + 1
+                    receiver["buffer"].remove(next_in_order)
+                    receiver["last_frame_received"] = next_in_order
+
+            else:
+                # Out-of-order frame, store in buffer if not already there
+                if frame not in receiver["buffer"]:
+                    receiver["buffer"].append(frame)
+
+        # Update largest acceptable frame (LAF)
+        receiver["largest_acceptable_frame"] = receiver["last_frame_received"] + receiver["rws"]
+
+        # Update ACK (cumulative ACK = last in-order frame)
+        ack = receiver["last_frame_received"]
+
+    return receiver, ack
+
 
 def sender_receive_ack(sender, ack, current_time):
     """
